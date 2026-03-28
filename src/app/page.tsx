@@ -14,11 +14,15 @@ import {
 import { type JSX, useCallback, useMemo, useState } from "react";
 import { ContextMenu, type ContextMenuProps } from "@/components/ContextMenu";
 import "@xyflow/react/dist/style.css";
+import { title } from "radashi";
+import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import { BaseNode, type BaseNodeProps } from "@/components/Nodes/BaseNode";
-import { ColorPreview } from "@/components/Nodes/Example/ColorPreview";
+import { Constant } from "@/components/Nodes/Constant";
+import { ColorPreview } from "@/components/Nodes/Fun/ColorPreview";
 import { Input } from "@/components/Nodes/Input";
-import { NumberInput } from "@/components/Nodes/NumberInput";
+import { Output } from "@/components/Nodes/Output";
+import { serializeGraph } from "@/utils/processGraph";
 
 type MouseEvent = React.MouseEvent;
 
@@ -40,16 +44,16 @@ type Folder<ComponentType> = {
 	contents: (ChartNode<ComponentType> | Folder<ComponentType>)[];
 };
 
-// Names should be in pascal case.
+// This is where we define the nodes a user can place. Names should be in pascal case.
 const nodeOptionsSchema = {
 	name: "Base",
 	contents: [
 		{
 			name: "Constant",
-			component: NumberInput,
+			component: Constant,
 		},
 		{
-			name: "FX",
+			name: "Effects",
 			contents: [
 				{
 					name: "Gain",
@@ -58,10 +62,14 @@ const nodeOptionsSchema = {
 						outputs: ["output"],
 					},
 				},
+			],
+		},
+		{
+			name: "Synths",
+			contents: [
 				{
-					name: "Reverb",
+					name: "SineWave",
 					component: {
-						inputs: ["test1", "test2"],
 						outputs: ["output"],
 					},
 				},
@@ -88,7 +96,10 @@ function transformFolder(
 			if ("contents" in item) {
 				return transformFolder(item);
 			}
-			if ("component" in item && "inputs" in item.component) {
+			if (
+				"component" in item &&
+				("inputs" in item.component || "outputs" in item.component)
+			) {
 				const component = ({ data }: BaseNodeProps) => <BaseNode data={data} />;
 				return { name: item.name, component };
 			}
@@ -119,16 +130,11 @@ function extractNodeTypes(
 const nodeTypes: Record<string, NodeComponent> = {
 	...extractNodeTypes(nodeOptions.contents),
 	Input,
+	Output,
 };
 
-type NodeContextMenu = {
-	nodeId: string;
-	x: number;
-	y: number;
-} | null;
-
-type EdgeContextMenu = {
-	edgeId: string;
+type ActionContextMenu = {
+	id: string;
 	x: number;
 	y: number;
 } | null;
@@ -138,7 +144,13 @@ export const initialNodes = [
 		id: "Input",
 		position: { x: 300, y: 200 },
 		type: "Input",
-		data: { name: "Input 1" },
+		data: { name: "Input" },
+	},
+	{
+		id: "Output",
+		position: { x: 500, y: 200 },
+		type: "Output",
+		data: { name: "Output" },
 	},
 ];
 
@@ -146,11 +158,8 @@ export default function HomePage() {
 	const reactFlow = useReactFlow();
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-	const [nodeMenu, setNodeMenu] = useState<NodeContextMenu>(null);
-	const [edgeMenu, setEdgeMenu] = useState<EdgeContextMenu>(null);
-
-	console.log(reactFlow.getEdges());
-	console.log(reactFlow.getNodes());
+	const [nodeMenu, setNodeMenu] = useState<ActionContextMenu>(null);
+	const [edgeMenu, setEdgeMenu] = useState<ActionContextMenu>(null);
 
 	const onConnect = useCallback(
 		(params: Edge | Connection) => {
@@ -182,7 +191,7 @@ export default function HomePage() {
 					type: node.name,
 					position: mousePos,
 					data:
-						"inputs" in node.component
+						"inputs" in node.component || "outputs" in node.component
 							? { name: node.name, io: node.component }
 							: { name: node.name },
 				},
@@ -195,7 +204,10 @@ export default function HomePage() {
 		(e: React.MouseEvent, node: Node) => {
 			e.preventDefault();
 			e.stopPropagation();
-			setNodeMenu({ nodeId: node.id, x: e.clientX, y: e.clientY });
+
+			if (node.id === "Input" || node.id === "Output") return;
+
+			setNodeMenu({ id: node.id, x: e.clientX, y: e.clientY });
 		},
 		[],
 	);
@@ -203,7 +215,7 @@ export default function HomePage() {
 		(e: React.MouseEvent, edge: Edge) => {
 			e.preventDefault();
 			e.stopPropagation();
-			setEdgeMenu({ edgeId: edge.id, x: e.clientX, y: e.clientY });
+			setEdgeMenu({ id: edge.id, x: e.clientX, y: e.clientY });
 		},
 		[],
 	);
@@ -241,12 +253,12 @@ export default function HomePage() {
 			folder.contents.map((item) => {
 				if ("contents" in item) {
 					return {
-						name: item.name,
+						name: title(item.name),
 						submenus: transformNodeOptionsToContextMenu(item),
 					};
 				}
 				return {
-					name: item.name,
+					name: title(item.name),
 					onClick: (e: MouseEvent) => addNode(e, item),
 				};
 			}),
@@ -257,6 +269,15 @@ export default function HomePage() {
 		() => transformNodeOptionsToContextMenu(nodeOptionsSchema),
 		[transformNodeOptionsToContextMenu],
 	);
+
+	const onClickSave = useCallback(() => {
+		const edges = reactFlow.getEdges();
+		const nodes = reactFlow.getNodes();
+
+		console.log(serializeGraph({ edges, nodes }));
+
+		toast("Success!", { type: "success" });
+	}, [reactFlow.getEdges, reactFlow.getNodes]);
 
 	return (
 		<div className="w-screen h-screen" onClick={closeAllMenus}>
@@ -285,7 +306,7 @@ export default function HomePage() {
 				>
 					<button
 						className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-neutral-700"
-						onClick={() => deleteNode(nodeMenu.nodeId)}
+						onClick={() => deleteNode(nodeMenu.id)}
 					>
 						Delete
 					</button>
@@ -300,12 +321,19 @@ export default function HomePage() {
 				>
 					<button
 						className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-neutral-700"
-						onClick={() => breakConnection(edgeMenu.edgeId)}
+						onClick={() => breakConnection(edgeMenu.id)}
 					>
 						Break Connection
 					</button>
 				</div>
 			)}
+
+			<button
+				onClick={onClickSave}
+				className="btn btn-success absolute bottom-10 right-10"
+			>
+				Save and Upload
+			</button>
 		</div>
 	);
 }

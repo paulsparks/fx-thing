@@ -15,6 +15,7 @@
 		"radashi": "^12.7.2",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
+		"react-toastify": "^11.0.5",
 		"uuid": "^13.0.0"
 	},
 	"devDependencies": {
@@ -23,6 +24,7 @@
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"daisyui": "^5.5.19",
 		"tailwindcss": "^4",
 		"typescript": "^5"
 	}

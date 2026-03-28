@@ -1,6 +1,8 @@
 import { Handle, Position } from "@xyflow/react";
 import { title } from "radashi";
 
+export type BaseNodeColor = "default" | "green" | "purple";
+
 export interface BaseNodeProps {
 	data: {
 		name: string;
@@ -8,17 +10,28 @@ export interface BaseNodeProps {
 			inputs?: string[];
 			outputs?: string[];
 		};
+		color?: BaseNodeColor;
 	};
 }
 
-export function BaseNode({ data }: BaseNodeProps) {
+const COLOR_MAP: Record<BaseNodeColor, string> = {
+	default: "",
+	green: "bg-node-green!",
+	purple: "bg-node-purple!",
+};
+
+export function BaseNode({
+	data: { name, io, color = "default" },
+}: BaseNodeProps) {
 	return (
-		<div className="react-flow__node-default nopan selectable draggable flex flex-col gap-4 px-0!">
-			<h1>{data.name}</h1>
+		<div
+			className={`react-flow__node-default nopan selectable draggable flex flex-col gap-4 px-0! ${COLOR_MAP[color]}`}
+		>
+			<h1>{title(name)}</h1>
 			<div className="flex justify-between">
 				{/* Inputs */}
 				<div className="flex flex-col gap-1">
-					{data.io.inputs?.map((input) => (
+					{io.inputs?.map((input) => (
 						<div key={input} className="flex gap-1">
 							<Handle
 								type="target"
@@ -32,7 +45,7 @@ export function BaseNode({ data }: BaseNodeProps) {
 				</div>
 				{/* Outputs */}
 				<div className="flex flex-col gap-1">
-					{data.io.outputs?.map((output) => (
+					{io.outputs?.map((output) => (
 						<div key={output} className="flex gap-1">
 							<label htmlFor={output}>{title(output)}</label>
 							<Handle
