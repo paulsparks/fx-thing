@@ -55,6 +55,25 @@ const nodeOptionsSchema = {
 			component: Constant,
 		},
 		{
+			name: "TransformAudio",
+			contents: [
+				{
+					name: "AudioToRms",
+					component: {
+						inputs: [{ name: "input", type: "audio" }],
+						outputs: [{ name: "output", type: "number" }],
+					},
+				},
+				{
+					name: "AudioToPeak",
+					component: {
+						inputs: [{ name: "input", type: "audio" }],
+						outputs: [{ name: "output", type: "number" }],
+					},
+				},
+			],
+		},
+		{
 			name: "Effects",
 			contents: [
 				{
