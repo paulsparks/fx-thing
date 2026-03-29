@@ -66,6 +66,53 @@ const nodeOptionsSchema = {
 						outputs: [{ name: "output", type: "audio" }],
 					},
 				},
+				{
+					name: "Reverb",
+					component: {
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "roomSize", type: "number" },
+							{ name: "damping", type: "number" },
+							{ name: "wetLevel", type: "number" },
+							{ name: "dryLevel", type: "number" },
+							{ name: "width", type: "number" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
+					},
+				},
+				{
+					name: "Compressor",
+					component: {
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "threshold (db)", type: "number" },
+							{ name: "ratio (x:1)", type: "number" },
+							{ name: "attack (ms)", type: "number" },
+							{ name: "release (ms)", type: "number" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
+					},
+				},
+				{
+					name: "HighPass",
+					component: {
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "cutoff (hz)", type: "number" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
+					},
+				},
+				{
+					name: "LowPass",
+					component: {
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "cutoff (hz)", type: "number" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
+					},
+				},
 			],
 		},
 	],
