@@ -116,6 +116,159 @@ const nodeOptionsSchema = {
 				},
 			],
 		},
+		{
+			name: "Math",
+			contents: [
+				{
+					name: "Basic",
+					contents: [
+						{
+							name: "Add",
+							component: {
+								inputs: [
+									{ name: "number 1", type: "number" },
+									{ name: "number 2", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Multiply",
+							component: {
+								inputs: [
+									{ name: "number 1", type: "number" },
+									{ name: "number 2", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Subtract",
+							component: {
+								inputs: [
+									{ name: "number 1", type: "number" },
+									{ name: "number 2", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Divide",
+							component: {
+								inputs: [
+									{ name: "number 1", type: "number" },
+									{ name: "number 2", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Exponent",
+							component: {
+								inputs: [
+									{ name: "input", type: "number" },
+									{ name: "exponent", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+					],
+				},
+				{
+					name: "Comparison",
+					contents: [
+						{
+							name: "GreaterThan",
+							component: {
+								inputs: [
+									{ name: "this", type: "number" },
+									{ name: "isGreaterThan", type: "number" },
+								],
+								outputs: [{ name: "output", type: "boolean" }],
+							},
+						},
+						{
+							name: "LessThan",
+							component: {
+								inputs: [
+									{ name: "this", type: "number" },
+									{ name: "isLessThan", type: "number" },
+								],
+								outputs: [{ name: "output", type: "boolean" }],
+							},
+						},
+					],
+				},
+				{
+					name: "Logic",
+					contents: [
+						{
+							name: "And",
+							component: {
+								inputs: [
+									{ name: "condition 1", type: "boolean" },
+									{ name: "condition 2", type: "boolean" },
+								],
+								outputs: [{ name: "output", type: "boolean" }],
+							},
+						},
+						{
+							name: "Or",
+							component: {
+								inputs: [
+									{ name: "condition 1", type: "boolean" },
+									{ name: "condition 2", type: "boolean" },
+								],
+								outputs: [{ name: "output", type: "boolean" }],
+							},
+						},
+						{
+							name: "Not",
+							component: {
+								inputs: [{ name: "condition", type: "boolean" }],
+								outputs: [{ name: "output", type: "boolean" }],
+							},
+						},
+					],
+				},
+				{
+					name: "Scaling",
+					contents: [
+						{
+							name: "Normalize",
+							component: {
+								inputs: [
+									{ name: "input", type: "number" },
+									{ name: "minimum", type: "number" },
+									{ name: "maximum", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Floor",
+							component: {
+								inputs: [
+									{ name: "input", type: "number" },
+									{ name: "floor", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+						{
+							name: "Ceiling",
+							component: {
+								inputs: [
+									{ name: "input", type: "number" },
+									{ name: "ceiling", type: "number" },
+								],
+								outputs: [{ name: "output", type: "number" }],
+							},
+						},
+					],
+				},
+			],
+		},
 	],
 } as const satisfies Folder<NodeComponent | NodeComponentSchema>;
 
