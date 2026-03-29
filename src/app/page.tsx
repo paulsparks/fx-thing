@@ -17,12 +17,14 @@ import "@xyflow/react/dist/style.css";
 import { title } from "radashi";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import z from "zod";
 import { BaseNode, type BaseNodeProps } from "@/components/Nodes/BaseNode";
 import { Constant } from "@/components/Nodes/Constant";
 import { ColorPreview } from "@/components/Nodes/Fun/ColorPreview";
 import { Input } from "@/components/Nodes/Input";
 import { Output } from "@/components/Nodes/Output";
 import { serializeGraph } from "@/utils/processGraph";
+import { graphSchema } from "@/utils/schema";
 
 type MouseEvent = React.MouseEvent;
 
@@ -270,13 +272,38 @@ export default function HomePage() {
 		[transformNodeOptionsToContextMenu],
 	);
 
-	const onClickSave = useCallback(() => {
+	const onClickSave = useCallback(async () => {
 		const edges = reactFlow.getEdges();
 		const nodes = reactFlow.getNodes();
 
-		console.log(serializeGraph({ edges, nodes }));
+		const graph = graphSchema.safeParse({ edges, nodes });
 
-		toast("Success!", { type: "success" });
+		if (graph.error) {
+			toast("Error: Invalid graph.", { type: "error" });
+			return;
+		}
+
+		const serializedGraph = serializeGraph(graph.data);
+
+		const response = await fetch("/api/graph", {
+			method: "POST",
+			body: JSON.stringify(serializedGraph),
+		});
+
+		if (response.ok) {
+			toast("Success!", { type: "success" });
+
+			return;
+		}
+
+		try {
+			const json = await response.json();
+			const responseData = z.object({ message: z.string() }).parse(json);
+
+			toast(`Error: ${responseData.message}`, { type: "error" });
+		} catch (_) {
+			toast("Error: Could not save graph.", { type: "error" });
+		}
 	}, [reactFlow.getEdges, reactFlow.getNodes]);
 
 	return (

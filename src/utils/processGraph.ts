@@ -1,19 +1,9 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: There's multiple known assertions in the algorithms used. */
 
-import type { Edge, Node } from "@xyflow/react";
 import { pick } from "radashi";
+import type { Graph } from "./schema";
 
 export type NodeType = string;
-
-type FxNode = Pick<Node, "id" | "type" | "data">;
-type FxEdge = Pick<Edge, "source" | "sourceHandle" | "target" | "targetHandle">;
-
-export interface FxGraph {
-	nodes: FxNode[];
-	edges: FxEdge[];
-	/** Optional precomputed topological order. Computed at runtime if omitted. */
-	processingOrder?: string[];
-}
 
 // -------- Topological sort (Kahn's algorithm) --------
 
@@ -23,7 +13,10 @@ export interface FxGraph {
  *
  * Throws if a cycle is detected.
  */
-export function topoSort(nodes: FxNode[], edges: FxEdge[]): string[] {
+export function topoSort(
+	nodes: Graph["nodes"],
+	edges: Graph["edges"],
+): string[] {
 	const inDegree: Record<string, number> = {};
 	const adj: Record<string, string[]> = {};
 
@@ -68,7 +61,7 @@ export function topoSort(nodes: FxNode[], edges: FxEdge[]): string[] {
  * Resolves the processing order (if not precomputed) and returns the graph
  * as a JSON string ready for the Python processor to consume.
  */
-export function serializeGraph(graph: FxGraph): string {
+export function serializeGraph(graph: Graph): Graph {
 	const processingOrder =
 		graph.processingOrder ?? topoSort(graph.nodes, graph.edges);
 
@@ -77,5 +70,5 @@ export function serializeGraph(graph: FxGraph): string {
 		pick(edge, ["source", "sourceHandle", "target", "targetHandle"]),
 	);
 
-	return JSON.stringify({ ...graph, processingOrder }, null, 2);
+	return { ...graph, processingOrder };
 }

@@ -928,6 +928,11 @@ uuid@^13.0.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-13.0.0.tgz#263dc341b19b4d755eb8fe36b78d95a6b65707e8"
   integrity sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==
 
+zod@^4.3.6:
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
+  integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
+
 zustand@^4.4.0:
   version "4.5.7"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.7.tgz#7d6bb2026a142415dd8be8891d7870e6dbe65f55"
