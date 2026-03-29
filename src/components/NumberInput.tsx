@@ -2,10 +2,11 @@ import { useCallback, useState } from "react";
 
 export interface NumberInputProps {
 	onChange?: (value: number) => void;
+	initialValue?: number;
 }
 
-export function NumberInput({ onChange }: NumberInputProps) {
-	const [inputValue, setInputValue] = useState("0");
+export function NumberInput({ onChange, initialValue = 0 }: NumberInputProps) {
+	const [inputValue, setInputValue] = useState(initialValue.toString());
 
 	const onInputChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {

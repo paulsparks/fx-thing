@@ -7,11 +7,12 @@ import {
 	type Edge,
 	type Node,
 	ReactFlow,
+	type ReactFlowInstance,
 	useEdgesState,
 	useNodesState,
 	useReactFlow,
 } from "@xyflow/react";
-import { type JSX, useCallback, useMemo, useState } from "react";
+import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { ContextMenu, type ContextMenuProps } from "@/components/ContextMenu";
 import "@xyflow/react/dist/style.css";
 import { title } from "radashi";
@@ -185,7 +186,7 @@ export const initialNodes = [
 	},
 	{
 		id: "Output",
-		position: { x: 500, y: 200 },
+		position: { x: 800, y: 200 },
 		type: "Output",
 		data: {
 			name: "Output",
@@ -197,12 +198,50 @@ export const initialNodes = [
 	},
 ];
 
+const graphKey = "fx-graph";
+
 export default function HomePage() {
 	const reactFlow = useReactFlow();
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 	const [nodeMenu, setNodeMenu] = useState<ActionContextMenu>(null);
 	const [edgeMenu, setEdgeMenu] = useState<ActionContextMenu>(null);
+	const [rfInstance, setRfInstance] = useState<ReactFlowInstance<
+		Node,
+		Edge
+	> | null>(null);
+	const { setViewport } = useReactFlow();
+
+	const save = useCallback(() => {
+		if (rfInstance) {
+			const graph = rfInstance.toObject();
+			localStorage.setItem(graphKey, JSON.stringify(graph));
+		}
+	}, [rfInstance]);
+
+	const restore = useCallback(() => {
+		const restoreGraph = async () => {
+			const graph = localStorage.getItem(graphKey);
+
+			if (!graph) return;
+
+			const graphJson = JSON.parse(graph);
+
+			if (graphJson) {
+				const { x = 0, y = 0, zoom = 1 } = graphJson.viewport;
+				setNodes(graphJson.nodes || []);
+				setEdges(graphJson.edges || []);
+				setViewport({ x, y, zoom });
+			}
+		};
+
+		restoreGraph();
+	}, [setNodes, setViewport, setEdges]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want this only on load.
+	useEffect(() => {
+		restore();
+	}, []);
 
 	const onConnect = useCallback(
 		(params: Edge | Connection) => {
@@ -218,8 +257,6 @@ export default function HomePage() {
 
 				const targetNodeIo = ioSchema.safeParse(targetNodeData);
 				const nodeIo = ioSchema.safeParse(nodeData);
-
-				console.log({ targetNodeIo, nodeIo });
 
 				if (!targetNodeIo.success || !nodeIo.success) {
 					return edges;
@@ -311,6 +348,24 @@ export default function HomePage() {
 		[setNodes, setEdges, closeNodeMenu],
 	);
 
+	const reset = useCallback(() => {
+		setNodes(initialNodes);
+		reactFlow.fitView({ padding: 2 });
+
+		if (rfInstance) {
+			localStorage.setItem(
+				graphKey,
+				JSON.stringify({
+					nodes: initialNodes,
+					edges: [],
+					viewport: { x: 0, y: 0, zoom: 1 },
+				}),
+			);
+		}
+
+		toast("Graph has been reset!", { type: "success" });
+	}, [setNodes, reactFlow.fitView, rfInstance]);
+
 	const transformNodeOptionsToContextMenu: (
 		folder: Folder<NodeComponent | NodeComponentSchema>,
 	) => ContextMenuProps["options"] = useCallback(
@@ -336,6 +391,8 @@ export default function HomePage() {
 	);
 
 	const onClickSave = useCallback(async () => {
+		save();
+
 		const edges = reactFlow.getEdges();
 		const nodes = reactFlow.getNodes();
 
@@ -367,7 +424,7 @@ export default function HomePage() {
 		} catch (_) {
 			toast("Error: Could not save graph.", { type: "error" });
 		}
-	}, [reactFlow.getEdges, reactFlow.getNodes]);
+	}, [reactFlow.getEdges, reactFlow.getNodes, save]);
 
 	return (
 		<div className="w-screen h-screen" onClick={closeAllMenus}>
@@ -382,6 +439,9 @@ export default function HomePage() {
 					colorMode="dark"
 					onNodeContextMenu={handleNodeContextMenu}
 					onEdgeContextMenu={handleEdgeContextMenu}
+					onInit={setRfInstance}
+					fitView
+					fitViewOptions={{ padding: 2 }}
 				>
 					<Background />
 					<Controls />
@@ -418,12 +478,14 @@ export default function HomePage() {
 				</div>
 			)}
 
-			<button
-				onClick={onClickSave}
-				className="btn btn-success absolute bottom-10 right-10"
-			>
-				Save and Upload
-			</button>
+			<div className="absolute bottom-10 right-10 flex gap-4">
+				<button onClick={reset} className="btn btn-error">
+					Reset
+				</button>
+				<button onClick={onClickSave} className="btn btn-success">
+					Save and Upload
+				</button>
+			</div>
 		</div>
 	);
 }

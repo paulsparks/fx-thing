@@ -42,7 +42,7 @@ export function ColorPreview() {
 					type="target"
 					position={Position.Left}
 					id="red"
-					className="top-1/6!"
+					className="top-1/6! w-2! h-2!"
 				/>
 				<label htmlFor="red" className="mix-blend-difference">
 					R
@@ -53,7 +53,7 @@ export function ColorPreview() {
 					type="target"
 					position={Position.Left}
 					id="green"
-					className="top-1/2!"
+					className="top-1/2! w-2! h-2!"
 				/>
 				<label htmlFor="green" className="mix-blend-difference">
 					G
@@ -64,7 +64,7 @@ export function ColorPreview() {
 					type="target"
 					position={Position.Left}
 					id="blue"
-					className="top-5/6!"
+					className="top-5/6! w-2! h-2!"
 				/>
 				<label htmlFor="red" className="mix-blend-difference">
 					B

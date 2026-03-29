@@ -42,7 +42,7 @@ export function BaseNode({
 						<div key={input.name} className="flex gap-1">
 							<Handle
 								type="target"
-								className="relative!"
+								className="relative! w-2! h-2!"
 								position={Position.Left}
 								id={input.name}
 							/>
@@ -71,7 +71,7 @@ export function BaseNode({
 							</div>
 							<Handle
 								type="source"
-								className="relative!"
+								className="relative! w-2! h-2!"
 								position={Position.Right}
 								id={output.name}
 							/>

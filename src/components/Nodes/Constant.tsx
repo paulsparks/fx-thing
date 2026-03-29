@@ -16,10 +16,20 @@ type InputType = "number" | "boolean";
 // TODO: Clean up the outputs/inputs logic.
 export function Constant({ id, data }: ConstantProps) {
 	const { updateNodeData, setEdges, getNodeConnections } = useReactFlow();
-	const [inputType, setInputType] = useState<InputType>("number");
+	const [inputType, setInputType] = useState<InputType>(
+		"value" in data ? (typeof data.value as InputType) : "number",
+	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to set an initial value.
 	useEffect(() => {
+		if ("value" in data) {
+			updateNodeData(id, {
+				value: data.value,
+				io: { outputs: [{ name: "output", type: typeof data }] },
+			});
+
+			return;
+		}
 		updateNodeData(id, {
 			value: 0,
 			io: { outputs: [{ name: "output", type: "number" }] },
@@ -66,11 +76,23 @@ export function Constant({ id, data }: ConstantProps) {
 						</select>
 						{inputType === "number" ? (
 							<NumberInput
-								onChange={(value) => updateNodeData(id, { value })}
+								onChange={(value) => {
+									updateNodeData(id, { value });
+								}}
+								initialValue={
+									"value" in data && typeof data.value === "number"
+										? data.value
+										: undefined
+								}
 							/>
 						) : (
 							<BooleanInput
 								onChange={(value) => updateNodeData(id, { value })}
+								initialValue={
+									"value" in data && typeof data.value === "boolean"
+										? data.value
+										: undefined
+								}
 							/>
 						)}
 					</div>
@@ -82,7 +104,7 @@ export function Constant({ id, data }: ConstantProps) {
 						</div>
 						<Handle
 							type="source"
-							className="relative!"
+							className="relative! w-2! h-2!"
 							position={Position.Right}
 							id="output"
 						/>

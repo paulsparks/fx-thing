@@ -2,10 +2,14 @@ import { useCallback, useState } from "react";
 
 export interface BooleanInputProps {
 	onChange?: (value: boolean) => void;
+	initialValue?: boolean;
 }
 
-export function BooleanInput({ onChange }: BooleanInputProps) {
-	const [checked, setChecked] = useState(false);
+export function BooleanInput({
+	onChange,
+	initialValue = false,
+}: BooleanInputProps) {
+	const [checked, setChecked] = useState(initialValue);
 
 	const onCheckboxChange = useCallback(() => {
 		const newValue = !checked;
