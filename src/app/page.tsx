@@ -58,8 +58,8 @@ const nodeOptionsSchema = {
 			name: "SineWave",
 			component: {
 				inputs: [
-					{ name: "frequency", type: "number" },
-					{ name: "amplitude (hz)", type: "number" },
+					{ name: "amplitude", type: "number" },
+					{ name: "frequency (hz)", type: "number" },
 				],
 				outputs: [
 					{ name: "output", type: "audio" },
@@ -76,25 +76,6 @@ const nodeOptionsSchema = {
 				],
 				outputs: [{ name: "output", type: "audio" }],
 			},
-		},
-		{
-			name: "TransformAudio",
-			contents: [
-				{
-					name: "AudioToRms",
-					component: {
-						inputs: [{ name: "input", type: "audio" }],
-						outputs: [{ name: "output", type: "number" }],
-					},
-				},
-				{
-					name: "AudioToPeak",
-					component: {
-						inputs: [{ name: "input", type: "audio" }],
-						outputs: [{ name: "output", type: "number" }],
-					},
-				},
-			],
 		},
 		{
 			name: "Effects",
@@ -308,6 +289,25 @@ const nodeOptionsSchema = {
 							},
 						},
 					],
+				},
+			],
+		},
+		{
+			name: "TransformAudio",
+			contents: [
+				{
+					name: "AudioToRms",
+					component: {
+						inputs: [{ name: "input", type: "audio" }],
+						outputs: [{ name: "output", type: "number" }],
+					},
+				},
+				{
+					name: "AudioToPeak",
+					component: {
+						inputs: [{ name: "input", type: "audio" }],
+						outputs: [{ name: "output", type: "number" }],
+					},
 				},
 			],
 		},
