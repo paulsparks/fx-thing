@@ -8,8 +8,9 @@ export function BooleanInput({ onChange }: BooleanInputProps) {
 	const [checked, setChecked] = useState(false);
 
 	const onCheckboxChange = useCallback(() => {
-		setChecked(!checked);
-		onChange?.(checked);
+		const newValue = !checked;
+		setChecked(newValue);
+		onChange?.(newValue);
 	}, [onChange, checked]);
 
 	return (

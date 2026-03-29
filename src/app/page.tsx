@@ -20,11 +20,10 @@ import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 import { BaseNode, type BaseNodeProps } from "@/components/Nodes/BaseNode";
 import { Constant } from "@/components/Nodes/Constant";
-import { ColorPreview } from "@/components/Nodes/Fun/ColorPreview";
 import { Input } from "@/components/Nodes/Input";
 import { Output } from "@/components/Nodes/Output";
 import { serializeGraph } from "@/utils/processGraph";
-import { graphSchema } from "@/utils/schema";
+import { graphSchema, ioSchema } from "@/utils/schema";
 
 type MouseEvent = React.MouseEvent;
 
@@ -60,29 +59,12 @@ const nodeOptionsSchema = {
 				{
 					name: "Gain",
 					component: {
-						inputs: ["input", "db"],
-						outputs: ["output"],
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "db", type: "number" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
 					},
-				},
-			],
-		},
-		{
-			name: "Synths",
-			contents: [
-				{
-					name: "SineWave",
-					component: {
-						outputs: ["output"],
-					},
-				},
-			],
-		},
-		{
-			name: "Fun",
-			contents: [
-				{
-					name: "ColorPreview",
-					component: ColorPreview,
 				},
 			],
 		},
@@ -146,13 +128,25 @@ export const initialNodes = [
 		id: "Input",
 		position: { x: 300, y: 200 },
 		type: "Input",
-		data: { name: "Input" },
+		data: {
+			name: "Input",
+			// TODO: Make this have one source of truth.
+			io: {
+				outputs: [{ name: "output", type: "audio" }],
+			},
+		},
 	},
 	{
 		id: "Output",
 		position: { x: 500, y: 200 },
 		type: "Output",
-		data: { name: "Output" },
+		data: {
+			name: "Output",
+			// TODO: Make this have one source of truth.
+			io: {
+				inputs: [{ name: "input", type: "audio" }],
+			},
+		},
 	},
 ];
 
@@ -172,12 +166,34 @@ export default function HomePage() {
 						edge.targetHandle === params.targetHandle,
 				);
 
-				if (edgeIsOccupied) return edges;
+				const targetNodeData = reactFlow.getNode(params.target)?.data;
+				const nodeData = reactFlow.getNode(params.source)?.data;
+
+				const targetNodeIo = ioSchema.safeParse(targetNodeData);
+				const nodeIo = ioSchema.safeParse(nodeData);
+
+				console.log({ targetNodeIo, nodeIo });
+
+				if (!targetNodeIo.success || !nodeIo.success) {
+					return edges;
+				}
+
+				const targetNodeType = targetNodeIo.data.io?.inputs?.find((input) => {
+					return input.name === params.targetHandle;
+				})?.type;
+				const nodeType = nodeIo.data.io?.outputs?.find(
+					(input) => input.name === params.sourceHandle,
+				)?.type;
+
+				const typeMismatch =
+					!targetNodeType || !nodeType || targetNodeType !== nodeType;
+
+				if (edgeIsOccupied || typeMismatch) return edges;
 
 				return addEdge(params, edges);
 			});
 		},
-		[setEdges],
+		[setEdges, reactFlow.getNode],
 	);
 
 	const addNode = useCallback(

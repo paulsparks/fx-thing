@@ -2,6 +2,7 @@ import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 import { BooleanInput } from "../BooleanInput";
 import { NumberInput } from "../NumberInput";
+import { TYPE_COLOR_MAP } from "./BaseNode";
 
 export interface ConstantProps {
 	id: string;
@@ -12,13 +13,17 @@ export interface ConstantProps {
 
 type InputType = "number" | "boolean";
 
+// TODO: Clean up the outputs/inputs logic.
 export function Constant({ id, data }: ConstantProps) {
-	const { updateNodeData } = useReactFlow();
+	const { updateNodeData, setEdges, getNodeConnections } = useReactFlow();
 	const [inputType, setInputType] = useState<InputType>("number");
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to set an initial value.
 	useEffect(() => {
-		updateNodeData(id, { value: 0 });
+		updateNodeData(id, {
+			value: 0,
+			io: { outputs: [{ name: "output", type: "number" }] },
+		});
 	}, []);
 
 	const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -27,11 +32,22 @@ export function Constant({ id, data }: ConstantProps) {
 		setInputType(newType);
 
 		if (newType === "number") {
-			updateNodeData(id, { value: 0 });
+			updateNodeData(id, {
+				value: 0,
+				io: { outputs: [{ name: "output", type: "number" }] },
+			});
 		}
 		if (newType === "boolean") {
-			updateNodeData(id, { value: false });
+			updateNodeData(id, {
+				value: false,
+				io: { outputs: [{ name: "output", type: "boolean" }] },
+			});
 		}
+
+		const connectedEdges = getNodeConnections({ nodeId: id });
+		setEdges((eds) =>
+			eds.filter((e) => connectedEdges.find((edge) => e.id !== edge.edgeId)),
+		);
 	};
 
 	return (
@@ -59,7 +75,11 @@ export function Constant({ id, data }: ConstantProps) {
 						)}
 					</div>
 					<div className="flex gap-1 justify-end self-end">
-						<label htmlFor="output">{"Output"}</label>
+						<div className="tooltip" data-tip={inputType}>
+							<label className={TYPE_COLOR_MAP[inputType]} htmlFor="output">
+								{"Output"}
+							</label>
+						</div>
 						<Handle
 							type="source"
 							className="relative!"

@@ -6,7 +6,7 @@ export function Output(props: BaseNodeProps) {
 		() => ({
 			name: props.data.name,
 			io: {
-				inputs: ["input"],
+				inputs: [{ name: "input", type: "audio" }],
 			},
 			color: "purple",
 		}),
