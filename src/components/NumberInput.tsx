@@ -27,7 +27,6 @@ export function NumberInput({ onChange }: NumberInputProps) {
 
 	return (
 		<input
-			type="number"
 			className="nodrag outline-1 outline-overlay-20 p-1 w-14 h-4"
 			value={inputValue}
 			onChange={onInputChange}
