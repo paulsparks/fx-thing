@@ -58,7 +58,7 @@ export function BaseNode({
 					))}
 				</div>
 				{/* Outputs */}
-				<div className="flex flex-col gap-1">
+				<div className="flex flex-col gap-1 items-end">
 					{io.outputs?.map((output) => (
 						<div key={output.name} className="flex gap-1">
 							<div className="tooltip" data-tip={output.type}>

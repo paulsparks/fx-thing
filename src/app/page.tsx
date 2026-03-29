@@ -55,6 +55,29 @@ const nodeOptionsSchema = {
 			component: Constant,
 		},
 		{
+			name: "SineWave",
+			component: {
+				inputs: [
+					{ name: "frequency", type: "number" },
+					{ name: "amplitude (hz)", type: "number" },
+				],
+				outputs: [
+					{ name: "output", type: "audio" },
+					{ name: "raw", type: "number" },
+				],
+			},
+		},
+		{
+			name: "Mixer",
+			component: {
+				inputs: [
+					{ name: "input 1", type: "audio" },
+					{ name: "input 2", type: "audio" },
+				],
+				outputs: [{ name: "output", type: "audio" }],
+			},
+		},
+		{
 			name: "TransformAudio",
 			contents: [
 				{
