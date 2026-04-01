@@ -560,6 +560,7 @@ export default function HomePage() {
 
 	const reset = useCallback(() => {
 		setNodes(initialNodes);
+		setEdges([]);
 		reactFlow.fitView({ padding: 2 });
 
 		if (rfInstance) {
@@ -574,7 +575,7 @@ export default function HomePage() {
 		}
 
 		toast("Graph has been reset!", { type: "success" });
-	}, [setNodes, reactFlow.fitView, rfInstance]);
+	}, [setNodes, reactFlow.fitView, rfInstance, setEdges]);
 
 	const transformNodeOptionsToContextMenu: (
 		folder: Folder<NodeComponent | NodeComponentSchema>,
