@@ -86,6 +86,7 @@ const nodeOptionsSchema = {
 						inputs: [
 							{ name: "input", type: "audio" },
 							{ name: "db", type: "number" },
+							{ name: "disabled", type: "boolean" },
 						],
 						outputs: [{ name: "output", type: "audio" }],
 					},
@@ -100,6 +101,7 @@ const nodeOptionsSchema = {
 							{ name: "wetLevel", type: "number" },
 							{ name: "dryLevel", type: "number" },
 							{ name: "width", type: "number" },
+							{ name: "disabled", type: "boolean" },
 						],
 						outputs: [{ name: "output", type: "audio" }],
 					},
@@ -113,6 +115,7 @@ const nodeOptionsSchema = {
 							{ name: "ratio (x:1)", type: "number" },
 							{ name: "attack (ms)", type: "number" },
 							{ name: "release (ms)", type: "number" },
+							{ name: "disabled", type: "boolean" },
 						],
 						outputs: [{ name: "output", type: "audio" }],
 					},
@@ -123,6 +126,7 @@ const nodeOptionsSchema = {
 						inputs: [
 							{ name: "input", type: "audio" },
 							{ name: "cutoff (hz)", type: "number" },
+							{ name: "disabled", type: "boolean" },
 						],
 						outputs: [{ name: "output", type: "audio" }],
 					},
@@ -133,6 +137,17 @@ const nodeOptionsSchema = {
 						inputs: [
 							{ name: "input", type: "audio" },
 							{ name: "cutoff (hz)", type: "number" },
+							{ name: "disabled", type: "boolean" },
+						],
+						outputs: [{ name: "output", type: "audio" }],
+					},
+				},
+				{
+					name: "Mute",
+					component: {
+						inputs: [
+							{ name: "input", type: "audio" },
+							{ name: "disabled", type: "boolean" },
 						],
 						outputs: [{ name: "output", type: "audio" }],
 					},
