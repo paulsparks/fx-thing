@@ -99,7 +99,7 @@ export function Constant({ id, data }: ConstantProps) {
 					<div className="flex gap-1 justify-end self-end">
 						<div className="tooltip" data-tip={inputType}>
 							<label className={TYPE_COLOR_MAP[inputType]} htmlFor="output">
-								{"Output"}
+								output
 							</label>
 						</div>
 						<Handle

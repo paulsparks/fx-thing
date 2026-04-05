@@ -66,7 +66,7 @@ export function BaseNode({ id, data }: BaseNodeProps) {
 									className={TYPE_COLOR_MAP[input.type]}
 									htmlFor={input.name}
 								>
-									{title(input.name)}
+									{input.name}
 								</label>
 							</div>
 						</div>
@@ -81,7 +81,7 @@ export function BaseNode({ id, data }: BaseNodeProps) {
 									className={TYPE_COLOR_MAP[output.type]}
 									htmlFor={output.name}
 								>
-									{title(output.name)}
+									{output.name}
 								</label>
 							</div>
 							<Handle

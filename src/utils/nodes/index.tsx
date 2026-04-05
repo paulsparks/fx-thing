@@ -17,7 +17,7 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "amplitude", type: "number" },
-				{ name: "frequency (hz)", type: "number" },
+				{ name: "frequency_hz", type: "number" },
 			],
 			outputs: [
 				{ name: "output", type: "audio" },
@@ -28,8 +28,8 @@ export const NODES = {
 	Mixer: {
 		io: {
 			inputs: [
-				{ name: "input 1", type: "audio" },
-				{ name: "input 2", type: "audio" },
+				{ name: "input_1", type: "audio" },
+				{ name: "input_2", type: "audio" },
 			],
 			outputs: [{ name: "output", type: "audio" }],
 		},
@@ -48,10 +48,10 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "input", type: "audio" },
-				{ name: "roomSize", type: "number" },
+				{ name: "room_size", type: "number" },
 				{ name: "damping", type: "number" },
-				{ name: "wetLevel", type: "number" },
-				{ name: "dryLevel", type: "number" },
+				{ name: "wet_level", type: "number" },
+				{ name: "dry_level", type: "number" },
 				{ name: "width", type: "number" },
 				{ name: "disabled", type: "boolean" },
 			],
@@ -62,10 +62,10 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "input", type: "audio" },
-				{ name: "threshold (db)", type: "number" },
-				{ name: "ratio (x:1)", type: "number" },
-				{ name: "attack (ms)", type: "number" },
-				{ name: "release (ms)", type: "number" },
+				{ name: "threshold_db", type: "number" },
+				{ name: "ratio_x_to_1", type: "number" },
+				{ name: "attack_ms", type: "number" },
+				{ name: "release_ms", type: "number" },
 				{ name: "disabled", type: "boolean" },
 			],
 			outputs: [{ name: "output", type: "audio" }],
@@ -75,7 +75,7 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "input", type: "audio" },
-				{ name: "cutoff (hz)", type: "number" },
+				{ name: "cutoff_hz", type: "number" },
 				{ name: "disabled", type: "boolean" },
 			],
 			outputs: [{ name: "output", type: "audio" }],
@@ -85,7 +85,7 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "input", type: "audio" },
-				{ name: "cutoff (hz)", type: "number" },
+				{ name: "cutoff_hz", type: "number" },
 				{ name: "disabled", type: "boolean" },
 			],
 			outputs: [{ name: "output", type: "audio" }],
@@ -103,8 +103,8 @@ export const NODES = {
 	Add: {
 		io: {
 			inputs: [
-				{ name: "number 1", type: "number" },
-				{ name: "number 2", type: "number" },
+				{ name: "number_1", type: "number" },
+				{ name: "number_2", type: "number" },
 			],
 			outputs: [{ name: "output", type: "number" }],
 		},
@@ -112,8 +112,8 @@ export const NODES = {
 	Multiply: {
 		io: {
 			inputs: [
-				{ name: "number 1", type: "number" },
-				{ name: "number 2", type: "number" },
+				{ name: "number_1", type: "number" },
+				{ name: "number_2", type: "number" },
 			],
 			outputs: [{ name: "output", type: "number" }],
 		},
@@ -121,8 +121,8 @@ export const NODES = {
 	Subtract: {
 		io: {
 			inputs: [
-				{ name: "number 1", type: "number" },
-				{ name: "number 2", type: "number" },
+				{ name: "number_1", type: "number" },
+				{ name: "number_2", type: "number" },
 			],
 			outputs: [{ name: "output", type: "number" }],
 		},
@@ -130,8 +130,8 @@ export const NODES = {
 	Divide: {
 		io: {
 			inputs: [
-				{ name: "number 1", type: "number" },
-				{ name: "number 2", type: "number" },
+				{ name: "number_1", type: "number" },
+				{ name: "number_2", type: "number" },
 			],
 			outputs: [{ name: "output", type: "number" }],
 		},
@@ -149,7 +149,7 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "this", type: "number" },
-				{ name: "isGreaterThan", type: "number" },
+				{ name: "is_greater_than", type: "number" },
 			],
 			outputs: [{ name: "output", type: "boolean" }],
 		},
@@ -158,7 +158,7 @@ export const NODES = {
 		io: {
 			inputs: [
 				{ name: "this", type: "number" },
-				{ name: "isLessThan", type: "number" },
+				{ name: "is_less_than", type: "number" },
 			],
 			outputs: [{ name: "output", type: "boolean" }],
 		},
@@ -166,8 +166,8 @@ export const NODES = {
 	And: {
 		io: {
 			inputs: [
-				{ name: "condition 1", type: "boolean" },
-				{ name: "condition 2", type: "boolean" },
+				{ name: "condition_1", type: "boolean" },
+				{ name: "condition_2", type: "boolean" },
 			],
 			outputs: [{ name: "output", type: "boolean" }],
 		},
@@ -175,8 +175,8 @@ export const NODES = {
 	Or: {
 		io: {
 			inputs: [
-				{ name: "condition 1", type: "boolean" },
-				{ name: "condition 2", type: "boolean" },
+				{ name: "condition_1", type: "boolean" },
+				{ name: "condition_2", type: "boolean" },
 			],
 			outputs: [{ name: "output", type: "boolean" }],
 		},
