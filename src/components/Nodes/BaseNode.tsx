@@ -1,12 +1,16 @@
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { title } from "radashi";
+import { useEffect } from "react";
+import { NODES } from "@/utils/nodes";
+import type { NodeName } from "@/utils/nodes/types";
 import type { NodeHandleType } from "@/utils/schema";
 
 export type BaseNodeColor = "default" | "green" | "purple";
 
 export interface BaseNodeProps {
+	id: string;
 	data: {
-		name: string;
+		name: NodeName;
 		io: {
 			inputs?: { name: string; type: NodeHandleType }[];
 			outputs?: { name: string; type: NodeHandleType }[];
@@ -27,9 +31,20 @@ export const TYPE_COLOR_MAP: Record<NodeHandleType, string> = {
 	boolean: "text-green-300",
 };
 
-export function BaseNode({
-	data: { name, io, color = "default" },
-}: BaseNodeProps) {
+export function BaseNode({ id, data }: BaseNodeProps) {
+	const { name, io, color = "default" } = data;
+	const { updateNodeData } = useReactFlow();
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Sync the data on first render.
+	useEffect(() => {
+		const node = NODES[name];
+
+		updateNodeData(
+			id,
+			typeof node === "function" ? { name } : { name, io: node.io },
+		);
+	}, []);
+
 	return (
 		<div
 			className={`react-flow__node-default nopan selectable draggable flex flex-col gap-4 px-0! ${COLOR_MAP[color]}`}

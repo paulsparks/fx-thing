@@ -11,369 +11,23 @@ import {
 	useEdgesState,
 	useNodesState,
 	useReactFlow,
+	type XYPosition,
 } from "@xyflow/react";
-import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ContextMenu, type ContextMenuProps } from "@/components/ContextMenu";
 import "@xyflow/react/dist/style.css";
-import { title } from "radashi";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
-import { BaseNode, type BaseNodeProps } from "@/components/Nodes/BaseNode";
-import { Constant } from "@/components/Nodes/Constant";
-import { Input } from "@/components/Nodes/Input";
-import { Output } from "@/components/Nodes/Output";
 import { serializeGraph } from "@/utils/processGraph";
 import { graphSchema, ioSchema } from "@/utils/schema";
+import "@/utils/nodes";
+import { title } from "radashi";
+import { BaseNode } from "@/components/Nodes/BaseNode";
+import { NODE_MENU, NODES } from "@/utils/nodes";
+import type { MenuFolder, NodeName } from "@/utils/nodes/types";
 
 type MouseEvent = React.MouseEvent;
-
-type NodeComponent = (props: {
-	id: string;
-	// biome-ignore lint/suspicious/noExplicitAny: Data can be anything.
-	data: any;
-}) => JSX.Element;
-
-type NodeComponentSchema = BaseNodeProps["data"]["io"];
-
-type ChartNode<ComponentType> = {
-	name: string;
-	component: ComponentType;
-};
-
-type Folder<ComponentType> = {
-	name: string;
-	contents: (ChartNode<ComponentType> | Folder<ComponentType>)[];
-};
-
-// This is where we define the nodes a user can place. Names should be in pascal case.
-const nodeOptionsSchema = {
-	name: "Base",
-	contents: [
-		{
-			name: "Constant",
-			component: Constant,
-		},
-		{
-			name: "SineWave",
-			component: {
-				inputs: [
-					{ name: "amplitude", type: "number" },
-					{ name: "frequency (hz)", type: "number" },
-				],
-				outputs: [
-					{ name: "output", type: "audio" },
-					{ name: "raw", type: "number" },
-				],
-			},
-		},
-		{
-			name: "Mixer",
-			component: {
-				inputs: [
-					{ name: "input 1", type: "audio" },
-					{ name: "input 2", type: "audio" },
-				],
-				outputs: [{ name: "output", type: "audio" }],
-			},
-		},
-		{
-			name: "Effects",
-			contents: [
-				{
-					name: "Gain",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "db", type: "number" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-				{
-					name: "Reverb",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "roomSize", type: "number" },
-							{ name: "damping", type: "number" },
-							{ name: "wetLevel", type: "number" },
-							{ name: "dryLevel", type: "number" },
-							{ name: "width", type: "number" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-				{
-					name: "Compressor",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "threshold (db)", type: "number" },
-							{ name: "ratio (x:1)", type: "number" },
-							{ name: "attack (ms)", type: "number" },
-							{ name: "release (ms)", type: "number" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-				{
-					name: "HighPass",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "cutoff (hz)", type: "number" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-				{
-					name: "LowPass",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "cutoff (hz)", type: "number" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-				{
-					name: "Mute",
-					component: {
-						inputs: [
-							{ name: "input", type: "audio" },
-							{ name: "disabled", type: "boolean" },
-						],
-						outputs: [{ name: "output", type: "audio" }],
-					},
-				},
-			],
-		},
-		{
-			name: "Math",
-			contents: [
-				{
-					name: "Basic",
-					contents: [
-						{
-							name: "Add",
-							component: {
-								inputs: [
-									{ name: "number 1", type: "number" },
-									{ name: "number 2", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Multiply",
-							component: {
-								inputs: [
-									{ name: "number 1", type: "number" },
-									{ name: "number 2", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Subtract",
-							component: {
-								inputs: [
-									{ name: "number 1", type: "number" },
-									{ name: "number 2", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Divide",
-							component: {
-								inputs: [
-									{ name: "number 1", type: "number" },
-									{ name: "number 2", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Exponent",
-							component: {
-								inputs: [
-									{ name: "input", type: "number" },
-									{ name: "exponent", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-					],
-				},
-				{
-					name: "Comparison",
-					contents: [
-						{
-							name: "GreaterThan",
-							component: {
-								inputs: [
-									{ name: "this", type: "number" },
-									{ name: "isGreaterThan", type: "number" },
-								],
-								outputs: [{ name: "output", type: "boolean" }],
-							},
-						},
-						{
-							name: "LessThan",
-							component: {
-								inputs: [
-									{ name: "this", type: "number" },
-									{ name: "isLessThan", type: "number" },
-								],
-								outputs: [{ name: "output", type: "boolean" }],
-							},
-						},
-					],
-				},
-				{
-					name: "Logic",
-					contents: [
-						{
-							name: "And",
-							component: {
-								inputs: [
-									{ name: "condition 1", type: "boolean" },
-									{ name: "condition 2", type: "boolean" },
-								],
-								outputs: [{ name: "output", type: "boolean" }],
-							},
-						},
-						{
-							name: "Or",
-							component: {
-								inputs: [
-									{ name: "condition 1", type: "boolean" },
-									{ name: "condition 2", type: "boolean" },
-								],
-								outputs: [{ name: "output", type: "boolean" }],
-							},
-						},
-						{
-							name: "Not",
-							component: {
-								inputs: [{ name: "condition", type: "boolean" }],
-								outputs: [{ name: "output", type: "boolean" }],
-							},
-						},
-					],
-				},
-				{
-					name: "Scaling",
-					contents: [
-						{
-							name: "Normalize",
-							component: {
-								inputs: [
-									{ name: "input", type: "number" },
-									{ name: "minimum", type: "number" },
-									{ name: "maximum", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Floor",
-							component: {
-								inputs: [
-									{ name: "input", type: "number" },
-									{ name: "floor", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-						{
-							name: "Ceiling",
-							component: {
-								inputs: [
-									{ name: "input", type: "number" },
-									{ name: "ceiling", type: "number" },
-								],
-								outputs: [{ name: "output", type: "number" }],
-							},
-						},
-					],
-				},
-			],
-		},
-		{
-			name: "TransformAudio",
-			contents: [
-				{
-					name: "AudioToRms",
-					component: {
-						inputs: [{ name: "input", type: "audio" }],
-						outputs: [{ name: "output", type: "number" }],
-					},
-				},
-				{
-					name: "AudioToPeak",
-					component: {
-						inputs: [{ name: "input", type: "audio" }],
-						outputs: [{ name: "output", type: "number" }],
-					},
-				},
-			],
-		},
-	],
-} as const satisfies Folder<NodeComponent | NodeComponentSchema>;
-
-function transformFolder(
-	folder: Folder<NodeComponent | NodeComponentSchema>,
-): Folder<NodeComponent> {
-	return {
-		name: folder.name,
-		contents: folder.contents.map((item) => {
-			if ("contents" in item) {
-				return transformFolder(item);
-			}
-			if (
-				"component" in item &&
-				("inputs" in item.component || "outputs" in item.component)
-			) {
-				const component = ({ data }: BaseNodeProps) => <BaseNode data={data} />;
-				return { name: item.name, component };
-			}
-			return item as ChartNode<NodeComponent>;
-		}),
-	};
-}
-
-// The same as nodeOptionsSchema, but with the component schemas transformed into components.
-const nodeOptions: Folder<NodeComponent> = transformFolder(nodeOptionsSchema);
-
-function extractNodeTypes(
-	contents: (Folder<NodeComponent> | ChartNode<NodeComponent>)[],
-): Record<string, NodeComponent> {
-	return Object.fromEntries(
-		contents.flatMap((item) => {
-			if ("component" in item) {
-				return [[item.name, item.component]];
-			}
-			if ("contents" in item) {
-				return Object.entries(extractNodeTypes(item.contents));
-			}
-			return [];
-		}),
-	);
-}
-
-const nodeTypes: Record<string, NodeComponent> = {
-	...extractNodeTypes(nodeOptions.contents),
-	Input,
-	Output,
-};
 
 type ActionContextMenu = {
 	id: string;
@@ -386,27 +40,28 @@ export const initialNodes = [
 		id: "Input",
 		position: { x: 300, y: 200 },
 		type: "Input",
-		data: {
-			name: "Input",
-			// TODO: Make this have one source of truth.
-			io: {
-				outputs: [{ name: "output", type: "audio" }],
-			},
-		},
+		data: {},
 	},
 	{
 		id: "Output",
 		position: { x: 800, y: 200 },
 		type: "Output",
-		data: {
-			name: "Output",
-			// TODO: Make this have one source of truth.
-			io: {
-				inputs: [{ name: "input", type: "audio" }],
-			},
-		},
+		data: {},
 	},
 ];
+
+const nodeTypes = Object.fromEntries(
+	Object.entries(NODES).map(([key, value]) =>
+		typeof value === "function"
+			? [key, value]
+			: [
+					key,
+					({ id }: { id: string }) => (
+						<BaseNode id={id} data={{ name: key as NodeName, io: value.io }} />
+					),
+				],
+	),
+);
 
 const graphKey = "fx-graph";
 
@@ -491,25 +146,18 @@ export default function HomePage() {
 	);
 
 	const addNode = useCallback(
-		(e: MouseEvent, node: ChartNode<NodeComponent | NodeComponentSchema>) => {
-			const mousePos = reactFlow.screenToFlowPosition({
-				x: e.clientX,
-				y: e.clientY,
-			});
+		(position: XYPosition, nodeName: NodeName) => {
 			setNodes((nds) => [
 				...nds,
 				{
-					id: `${node.name}-${uuidv4()}`,
-					type: node.name,
-					position: mousePos,
-					data:
-						"inputs" in node.component || "outputs" in node.component
-							? { name: node.name, io: node.component }
-							: { name: node.name },
+					id: `${nodeName}-${uuidv4()}`,
+					type: nodeName,
+					position,
+					data: {},
 				},
 			]);
 		},
-		[reactFlow, setNodes],
+		[setNodes],
 	);
 
 	const handleNodeContextMenu = useCallback(
@@ -577,28 +225,31 @@ export default function HomePage() {
 		toast("Graph has been reset!", { type: "success" });
 	}, [setNodes, reactFlow.fitView, rfInstance, setEdges]);
 
-	const transformNodeOptionsToContextMenu: (
-		folder: Folder<NodeComponent | NodeComponentSchema>,
+	const menuFolderToContextMenu: (
+		folder: MenuFolder,
 	) => ContextMenuProps["options"] = useCallback(
 		(folder) =>
-			folder.contents.map((item) => {
-				if ("contents" in item) {
+			Object.entries(folder).map(([key, value]) => {
+				if (typeof value === "string") {
 					return {
-						name: title(item.name),
-						submenus: transformNodeOptionsToContextMenu(item),
+						name: title(key),
+						onClick: (e: MouseEvent) => {
+							addNode(
+								reactFlow.screenToFlowPosition({
+									x: e.clientX,
+									y: e.clientY,
+								}),
+								key as NodeName,
+							);
+						},
 					};
 				}
 				return {
-					name: title(item.name),
-					onClick: (e: MouseEvent) => addNode(e, item),
+					name: title(key),
+					submenus: menuFolderToContextMenu(folder[key] as MenuFolder),
 				};
 			}),
-		[addNode],
-	);
-
-	const options: ContextMenuProps["options"] = useMemo(
-		() => transformNodeOptionsToContextMenu(nodeOptionsSchema),
-		[transformNodeOptionsToContextMenu],
+		[addNode, reactFlow.screenToFlowPosition],
 	);
 
 	const onClickSave = useCallback(async () => {
@@ -639,7 +290,10 @@ export default function HomePage() {
 
 	return (
 		<div className="w-screen h-screen" onClick={closeAllMenus}>
-			<ContextMenu options={options} className="w-full h-full">
+			<ContextMenu
+				options={menuFolderToContextMenu(NODE_MENU)}
+				className="w-full h-full"
+			>
 				<ReactFlow
 					nodeTypes={nodeTypes}
 					nodes={nodes}

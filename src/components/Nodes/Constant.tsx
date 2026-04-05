@@ -7,7 +7,7 @@ import { TYPE_COLOR_MAP } from "./BaseNode";
 export interface ConstantProps {
 	id: string;
 	data: {
-		name: string;
+		value?: number | boolean;
 	};
 }
 
@@ -17,12 +17,12 @@ type InputType = "number" | "boolean";
 export function Constant({ id, data }: ConstantProps) {
 	const { updateNodeData, setEdges, getNodeConnections } = useReactFlow();
 	const [inputType, setInputType] = useState<InputType>(
-		"value" in data ? (typeof data.value as InputType) : "number",
+		data.value ? (typeof data.value as InputType) : "number",
 	);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to set an initial value.
 	useEffect(() => {
-		if ("value" in data) {
+		if (data.value) {
 			updateNodeData(id, {
 				value: data.value,
 				io: { outputs: [{ name: "output", type: typeof data }] },
@@ -62,7 +62,7 @@ export function Constant({ id, data }: ConstantProps) {
 
 	return (
 		<div className="react-flow__node-default nopan selectable draggable flex flex-col gap-2 px-0!">
-			<div>{data.name}</div>
+			<div>Constant</div>
 			<div className="flex">
 				<div className="flex flex-col gap-2 w-full items-center">
 					<div className="w-full flex flex-row px-1 gap-1 justify-center items-center">
@@ -80,7 +80,7 @@ export function Constant({ id, data }: ConstantProps) {
 									updateNodeData(id, { value });
 								}}
 								initialValue={
-									"value" in data && typeof data.value === "number"
+									data.value && typeof data.value === "number"
 										? data.value
 										: undefined
 								}
@@ -89,7 +89,7 @@ export function Constant({ id, data }: ConstantProps) {
 							<BooleanInput
 								onChange={(value) => updateNodeData(id, { value })}
 								initialValue={
-									"value" in data && typeof data.value === "boolean"
+									data.value && typeof data.value === "boolean"
 										? data.value
 										: undefined
 								}
